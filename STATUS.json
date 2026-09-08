@@ -1,13 +1,16 @@
 {
   "repo": "Grok-Ramage01",
   "era": "01",
-  "title": "Implementation lab",
   "status": "IMPLEMENTATION",
   "family": "quantum",
   "owned_claim": "A2_Sq",
-  "owned_object": "Sigma_Sq",
-  "sigma_sq": {"alpha": 0, "u": 0, "F": 0, "H": 0, "a2": 1},
+  "milestones": {
+    "germ": "done",
+    "wave_layer": "done",
+    "desk_frame": "done",
+    "barrett_construction": "checklist_only_newton_off"
+  },
+  "stokes_connection_residual_abs": 1.83e-15,
   "sigma_res": "parked_in_Grok-Ramage00",
-  "predecessor": "https://github.com/grok-Ramage/Grok-Ramage00",
-  "opened_at": "2026-09-08"
+  "updated_at": "2026-09-08"
 }
