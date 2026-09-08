@@ -1,0 +1,8 @@
+{
+  "ledger": "fold_hunt",
+  "era": "00",
+  "question": "is this on-shell point a fold of ReS?",
+  "witness": 0,
+  "sigma_res": [],
+  "note": "Read-only fixture. Grok-Ramage01 does not certify Sigma_ReS."
+}

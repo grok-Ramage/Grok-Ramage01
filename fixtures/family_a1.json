@@ -1,0 +1,17 @@
+{
+  "family": "anti-glue",
+  "source": "Grok-Ramage00 freeze of family_a1.json",
+  "jacobian": "D2 ReS",
+  "glue": "F = F0 + kappa G, G parallel F0",
+  "class_rule": "on-shell regular saddle; not a fold; do not unfold",
+  "a1_range": [-0.299, -0.206],
+  "sign_change": false,
+  "points": [
+    {"sep": 0.6, "kappa_star": -6.554, "abs_g": 3.8e-8, "a1": -0.252, "gap": 0.074, "class": "regular saddle"},
+    {"sep": 0.8, "kappa_star": -6.397, "abs_g": 2.1e-8, "a1": -0.245, "gap": 0.081, "class": "regular saddle"},
+    {"sep": 1.0, "kappa_star": -6.343, "abs_g": 1.9e-8, "a1": -0.283, "gap": 0.061, "class": "regular saddle"},
+    {"sep": 1.2, "kappa_star": -6.320, "abs_g": 2.0e-8, "a1": -0.299, "gap": 0.053, "class": "regular saddle"},
+    {"sep": 1.4, "kappa_star": -6.962, "abs_g": 1.7e-8, "a1": -0.210, "gap": 0.086, "class": "regular saddle"},
+    {"sep": 1.6, "kappa_star": -6.977, "abs_g": 2.1e-8, "a1": -0.206, "gap": 0.089, "class": "regular saddle"}
+  ]
+}
