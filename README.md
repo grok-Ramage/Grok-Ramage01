@@ -2,8 +2,10 @@
 
 **Status:** `IMPLEMENTATION`  
 **Predecessor:** [Grok-Ramage00](https://github.com/grok-Ramage/Grok-Ramage00)  
+**Project Desk:** [Grok-Ramage Project Desk](https://github.com/grok-Ramage/Grok-Ramage-Project-Desk)  
 **Owned family:** quantum S_q  
-**Owned object:** Sigma_Sq
+**Owned object:** Sigma_Sq  
+**Optical desk:** parked TEXT at `notes/optical/`. Not a family.
 
 This is the new project. It implements solutions. It does not hunt Sigma_ReS.
 

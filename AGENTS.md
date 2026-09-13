@@ -21,3 +21,9 @@ This repo is the implementation lab. Fold Hunt search lives in Grok-Ramage00 and
 ## Predecessor
 
 https://github.com/grok-Ramage/Grok-Ramage00
+
+## Project Desk
+
+https://github.com/grok-Ramage/Grok-Ramage-Project-Desk
+
+Optical desk is parked TEXT at `notes/optical/`. Not a family. Do not unpark it without a charter.

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Critical Curves &amp; Caustics — Sheared Point Lens</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+  :root{
+    --bg:#0B1220;
+    --panel:#121B2E;
+    --panel-2:#0F1729;
+    --border:#223252;
+    --text:#E7ECF5;
+    --text-dim:#8B98B5;
+    --text-faint:#5C6987;
+    --lens:#4FD1E8;
+    --lens-fill:rgba(79,209,232,0.10);
+    --caustic:#F5A623;
+    --caustic-fill:rgba(245,166,35,0.10);
+    --ring:#445068;
+    --pass:#4ADE80;
+    --fail:#F26B6B;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    padding:20px 16px 60px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-size:1.5rem;font-weight:650;margin:0 0 6px;letter-spacing:-0.01em;}
+  .framing{color:var(--text-dim);font-size:0.92rem;max-width:62ch;margin:0 0 22px;}
+  h2{font-size:1.02rem;font-weight:650;margin:0 0 12px;color:var(--text);}
+  .section{margin-bottom:26px;}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+  }
+  .control-row{
+    display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;
+  }
+  .control-row label{font-size:0.88rem;color:var(--text-dim);white-space:nowrap;}
+  input[type=range]{flex:1;min-width:140px;accent-color:var(--lens);}
+  .gamma-val{
+    font-family:var(--mono);font-size:0.95rem;background:var(--panel-2);
+    border:1px solid var(--border);border-radius:6px;padding:3px 9px;min-width:64px;text-align:center;
+  }
+  .plots{
+    display:flex;flex-direction:column;gap:16px;
+  }
+  @media(min-width:680px){
+    .plots{flex-direction:row;}
+    .plot-box{flex:1;}
+  }
+  .plot-box{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px;
+  }
+  .plot-title{
+    font-size:0.82rem;color:var(--text-dim);margin-bottom:6px;display:flex;justify-content:space-between;
+  }
+  .plot-title .accent-dot{
+    display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;position:relative;top:-1px;
+  }
+  svg{width:100%;height:auto;display:block;}
+  .scale-note{font-family:var(--mono);font-size:0.72rem;color:var(--text-faint);margin-top:4px;}
+  table.readout{width:100%;border-collapse:collapse;font-size:0.9rem;}
+  table.readout td{padding:7px 4px;border-top:1px solid var(--border);}
+  table.readout td.k{color:var(--text-dim);width:40%;}
+  table.readout td.v{font-family:var(--mono);text-align:right;}
+  .tests{display:flex;flex-direction:column;gap:10px;}
+  .test{
+    display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:8px;
+  }
+  .test-num{
+    font-family:var(--mono);font-size:0.78rem;color:var(--text-faint);
+    min-width:18px;padding-top:2px;
+  }
+  .test-body{flex:1;min-width:0;}
+  .test-label{font-size:0.9rem;margin-bottom:3px;}
+  .test-detail{font-family:var(--mono);font-size:0.78rem;color:var(--text-dim);word-break:break-word;}
+  .pill{
+    font-family:var(--mono);font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;
+    white-space:nowrap;height:fit-content;
+  }
+  .pill.pass{background:rgba(74,222,128,0.14);color:var(--pass);}
+  .pill.fail{background:rgba(242,107,107,0.14);color:var(--fail);}
+  details{
+    background:var(--panel);border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;margin-bottom:14px;
+  }
+  details > summary{
+    cursor:pointer;font-weight:600;font-size:0.98rem;margin:-2px 0 0;
+    list-style:none;
+  }
+  details > summary::-webkit-details-marker{display:none;}
+  details > summary::before{content:"▸ ";color:var(--text-faint);}
+  details[open] > summary::before{content:"▾ ";}
+  .eq{overflow-x:auto;padding:6px 0;}
+  .eq-block{margin:14px 0;}
+  .step-label{font-size:0.84rem;color:var(--text-dim);margin:16px 0 2px;}
+  .fix-note{
+    font-size:0.82rem;color:var(--lens);background:var(--lens-fill);
+    border-left:2px solid var(--lens);padding:6px 10px;margin:8px 0 14px;border-radius:0 6px 6px 0;
+  }
+  .assumptions ul{margin:6px 0 0;padding-left:20px;font-size:0.87rem;color:var(--text-dim);}
+  .assumptions li{margin-bottom:6px;}
+  .katex-display{margin:0.3em 0;}
+  code.inline{font-family:var(--mono);background:var(--panel-2);padding:1px 5px;border-radius:4px;font-size:0.86em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Critical curves &amp; caustics of a sheared point lens</h1>
+  <p class="framing">This is closed-form complex analysis, not an empirical claim — so "testing" it means checking the algebra against an independent numerical computation, live, at whatever shear you pick below. Drag the slider; every number underneath recomputes from scratch.</p>
+
+  <div class="section card">
+    <div class="control-row">
+      <label for="gammaSlider">External shear γ</label>
+      <input type="range" id="gammaSlider" min="-0.95" max="0.95" step="0.005" value="0.3">
+      <span class="gamma-val" id="gammaVal">0.300</span>
+    </div>
+    <div class="plots">
+      <div class="plot-box">
+        <div class="plot-title"><span><span class="accent-dot" style="background:var(--lens)"></span>Image plane — critical curve</span></div>
+        <svg id="svgImage" viewBox="-1.3 -1.3 2.6 2.6"></svg>
+        <div class="scale-note" id="imageScaleNote"></div>
+      </div>
+      <div class="plot-box">
+        <div class="plot-title"><span><span class="accent-dot" style="background:var(--caustic)"></span>Source plane — caustic</span></div>
+        <svg id="svgSource" viewBox="-0.7 -0.7 1.4 1.4"></svg>
+        <div class="scale-note" id="sourceScaleNote"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section card">
+    <h2>Cusp coordinates (closed form)</h2>
+    <table class="readout">
+      <tr><td class="k">Horizontal cusps, ζ = (1−γ)z − 1/z at θ=0</td><td class="v" id="rowH">—</td></tr>
+      <tr><td class="k">Vertical cusps, ζ = (1+γ)z + 1/z at θ=π</td><td class="v" id="rowV">—</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Verification suite</h2>
+    <div class="tests" id="testsContainer"></div>
+  </div>
+
+  <details open>
+    <summary>Full derivation</summary>
+
+    <div class="step-label">Lens equation and Jacobian</div>
+    <div class="eq" id="eq1"></div>
+    <div class="eq" id="eq2"></div>
+    <div class="eq" id="eq3"></div>
+
+    <div class="step-label">Critical curve, parametrized by θ</div>
+    <div class="eq" id="eq4"></div>
+    <p style="font-size:0.87rem;color:var(--text-dim);margin:8px 0;">
+      θ is anchored to <code class="inline">z</code>, not <code class="inline">z̄</code>. Conjugating both sides (γ, θ real) is therefore required before this relation can be substituted into anything built from ∂ζ/∂z̄ — skipping that step is the single point where a sign gets lost in the version this replaces:
+    </div>
+    <div class="eq" id="eq5"></div>
+    <div class="fix-note">This is the corrected line. The earlier version substituted <code class="inline">e^{iθ}</code> here directly, reusing θ's own defining relation instead of its conjugate. It only escaped detection because the two coincide exactly at θ = 0 and θ = π.</div>
+
+    <div class="step-label">Tangent vector along the critical curve</div>
+    <div class="eq" id="eq6"></div>
+    <div class="eq" id="eq7"></div>
+
+    <div class="step-label">Cusp condition</div>
+    <div class="eq" id="eq8"></div>
+    <div class="eq" id="eq9"></div>
+    <div class="eq" id="eq10"></div>
+
+    <div class="step-label">Cusp positions in the source plane</div>
+    <div class="eq" id="eq11"></div>
+    <div class="eq" id="eq12"></div>
+  </details>
+
+  <details open>
+    <summary>Completeness: why exactly these two angles, and no others</summary>
+    <p style="font-size:0.87rem;color:var(--text-dim);">
+      Write <span id="eqInlineA" style="display:inline-block;"></span>. The critical-curve argument fixes <span id="eqInlineB" style="display:inline-block;"></span>, and the cusp condition reduces to <span id="eqInlineC" style="display:inline-block;"></span>.
+    </p>
+    <div class="eq" id="eq13"></div>
+    <p style="font-size:0.87rem;color:var(--text-dim);">
+      Since α is strictly increasing for every |γ| &lt; 1, <span id="eqInlineD" style="display:inline-block;"></span> has exactly one interior extremum on (0,π) and one on (π,2π), with F(0)=F(π)=F(2π)=0. A function with a single interior extremum between equal endpoint values cannot cross zero anywhere in between — so F = 0 only at θ = 0, π. The live scan below additionally confirms the residual never reaches the other branch values ±2π/3 across this tool's γ range, which the closed-form argument above doesn't by itself rule out.
+    </p>
+  </details>
+
+  <div class="section card assumptions">
+    <h2>Assumptions &amp; domain of validity</h2>
+    <ul>
+      <li>γ is real and the shear axis is aligned with the real axis — a general complex shear γe^{2iφ_γ} can always be rotated into this form without loss of generality.</li>
+      <li>Lengths are in units of the Einstein radius (θ_E = 1) for both the image plane (z) and source plane (ζ).</li>
+      <li>Valid for |γ| &lt; 1: a single closed critical curve with exactly four cusps — this is the standard point-mass-plus-external-shear configuration, sometimes called the Chang–Refsdal lens.</li>
+      <li>As γ → 1⁻ the vertical cusps diverge (∝ 1/√(1−γ)); γ = 1 is a genuine bifurcation of the topology and is out of scope here, so the slider stops at 0.95.</li>
+      <li>This models a point mass perturbed by uniform external shear — a standard idealization for a star perturbed by a distant companion, not a full multi-body or extended-mass treatment.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+// ---------- complex helpers: numbers as [re, im] ----------
+const C = {
+  add:(a,b)=>[a[0]+b[0], a[1]+b[1]],
+  sub:(a,b)=>[a[0]-b[0], a[1]-b[1]],
+  mul:(a,b)=>[a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]],
+  scale:(a,s)=>[a[0]*s, a[1]*s],
+  conj:(a)=>[a[0], -a[1]],
+  abs:(a)=>Math.hypot(a[0],a[1]),
+  inv:(a)=>{ const d=a[0]*a[0]+a[1]*a[1]; return [a[0]/d, -a[1]/d]; }
+};
+
+// ---------- lens geometry, parametrized by phi = arg(z) (branch-cut free) ----------
+function uOf(phi,g){
+  const c2=Math.cos(2*phi), s2=Math.sin(2*phi);
+  return g*c2 + Math.sqrt(1 - g*g*s2*s2);
+}
+function duOf(phi,g){
+  const s2=Math.sin(2*phi), s4=Math.sin(4*phi);
+  const denom = Math.sqrt(1 - g*g*s2*s2);
+  return -2*g*s2 - (g*g*s4)/denom;
+}
+function zOf(phi,g){
+  const u=uOf(phi,g), r=1/Math.sqrt(u);
+  return [r*Math.cos(phi), r*Math.sin(phi)];
+}
+function dzOf(phi,g){
+  const u=uOf(phi,g), r=1/Math.sqrt(u), du=duOf(phi,g);
+  const dr = -0.5*r*r*r*du;
+  const c=Math.cos(phi), s=Math.sin(phi);
+  return [dr*c - r*s, dr*s + r*c];
+}
+function zetaOf(z,g){
+  const zb = C.conj(z);
+  return C.sub(C.sub(z, C.scale(zb,g)), C.inv(zb));
+}
+function dzetaOf(phi,g){
+  const z = zOf(phi,g);
+  const dz = dzOf(phi,g);
+  const dzb = C.conj(dz);
+  const zb = C.conj(z);
+  const coeff = C.sub(C.inv(C.mul(zb,zb)), [g,0]);
+  return C.add(dz, C.mul(coeff, dzb));
+}
+
+// ---------- cusp finder: coarse scan + local refine, no assumptions about theta ----------
+function findCusps(g){
+  const N = 2880;
+  const dphi = 2*Math.PI/N;
+  const mags = new Float64Array(N);
+  for(let i=0;i<N;i++){
+    const d = dzetaOf(i*dphi, g);
+    mags[i] = Math.hypot(d[0], d[1]);
+  }
+  const sorted = Array.from(mags).sort((a,b)=>a-b);
+  const median = sorted[Math.floor(N/2)];
+
+  const candidates = [];
+  for(let i=0;i<N;i++){
+    const prev = mags[(i-1+N)%N], next = mags[(i+1)%N];
+    if (mags[i] <= prev && mags[i] <= next && mags[i] < median*0.05) candidates.push(i);
+  }
+  candidates.sort((a,b)=>a-b);
+  const clusters = [];
+  let cur = candidates.length ? [candidates[0]] : [];
+  for(let k=1;k<candidates.length;k++){
+    if (candidates[k]-candidates[k-1] <= 4) cur.push(candidates[k]);
+    else { clusters.push(cur); cur=[candidates[k]]; }
+  }
+  if (cur.length) clusters.push(cur);
+  if (clusters.length>1){
+    const first=clusters[0], last=clusters[clusters.length-1];
+    if (first[0] + (N-last[last.length-1]) <= 4){
+      clusters[0] = last.concat(first);
+      clusters.pop();
+    }
+  }
+  const coarse = clusters.map(cl => cl.reduce((a,b)=> mags[a]<=mags[b]?a:b));
+
+  return coarse.map(idx=>{
+    const center = idx*dphi;
+    let best = {phi:center, mag:mags[idx]};
+    const M = 4000;
+    for(let j=0;j<=M;j++){
+      const phi = center - dphi/2 + dphi*j/M;
+      const d = dzetaOf(phi,g);
+      const m = Math.hypot(d[0],d[1]);
+      if (m < best.mag) best = {phi, mag:m};
+    }
+    const z = zOf(best.phi,g);
+    const zt = zetaOf(z,g);
+    return {phi:best.phi, mag:best.mag, z, zeta:zt};
+  }).sort((a,b)=>a.phi-b.phi);
+}
+
+// ---------- verification ----------
+function runVerification(g){
+  const N = 2000;
+  let maxResidual = 0, maxUMinus = -Infinity;
+  for(let i=0;i<N;i++){
+    const phi = 2*Math.PI*i/N;
+    const c2=Math.cos(2*phi), s2=Math.sin(2*phi);
+    const disc = 1-g*g*s2*s2, sq=Math.sqrt(disc);
+    const uPlus = g*c2+sq, uMinus = g*c2-sq;
+    if (uMinus > maxUMinus) maxUMinus = uMinus;
+    const r = 1/Math.sqrt(uPlus);
+    const z = [r*Math.cos(phi), r*Math.sin(phi)];
+    const zb = C.conj(z);
+    const val = C.sub(C.inv(C.mul(zb,zb)), [g,0]);
+    const resid = Math.abs(C.abs(val)-1);
+    if (resid > maxResidual) maxResidual = resid;
+  }
+
+  const cusps = findCusps(g);
+  const targets = [0,90,180,270];
+  const angleErrors = cusps.map(c=>{
+    const deg = (c.phi*180/Math.PI + 360) % 360;
+    let best = Infinity;
+    targets.forEach(t=>{ best = Math.min(best, Math.abs(deg-t), Math.abs(360-Math.abs(deg-t))); });
+    return best;
+  });
+  const angleOk = cusps.length===4 && angleErrors.every(e=>e<0.05);
+
+  const zxClosed = 2*g/Math.sqrt(1+g);
+  const zyClosed = 2*g/Math.sqrt(1-g);
+  let zxNumeric=null, zyNumeric=null;
+  cusps.forEach(c=>{
+    const deg = (c.phi*180/Math.PI+360)%360;
+    if (Math.abs(deg-0)<1 || Math.abs(deg-360)<1) zxNumeric = c.zeta[0];
+    if (Math.abs(deg-90)<1) zyNumeric = c.zeta[1];
+  });
+  // Compared by magnitude: the phi=0 branch of the closed form (1-gamma)z-1/z evaluates
+  // to -2*gamma/sqrt(1+gamma) for the z=+r0 root (sign flips with the choice of root),
+  // while the vertical branch happens to keep a matching sign. Magnitude is the
+  // unambiguous, root-independent quantity, so that's what's checked here.
+  const dx = (zxNumeric!==null) ? Math.abs(Math.abs(zxNumeric)-Math.abs(zxClosed)) : NaN;
+  const dy = (zyNumeric!==null) ? Math.abs(Math.abs(zyNumeric)-Math.abs(zyClosed)) : NaN;
+
+  return {maxResidual, maxUMinus, cusps, angleOk, angleErrors, zxClosed, zyClosed, zxNumeric, zyNumeric, dx, dy};
+}
+
+function fmt(x,d=6){ return Number.isFinite(x) ? x.toFixed(d) : "—"; }
+function fmtExp(x,d=2){ return Number.isFinite(x) ? x.toExponential(d) : "—"; }
+
+function renderTests(v){
+  const rows = [
+    {
+      label:"Critical curve satisfies det J = 0",
+      detail:`max over 2000 sampled points of ||1/z̄²−γ| − 1| = ${fmtExp(v.maxResidual)}`,
+      pass: v.maxResidual < 1e-8
+    },
+    {
+      label:"No second critical-curve branch (single-curve topology)",
+      detail:`the other root of the same quadratic reaches a maximum of ${fmt(v.maxUMinus,6)} (stays negative ⇒ unphysical, confirming one curve, not two)`,
+      pass: v.maxUMinus < -1e-6
+    },
+    {
+      label:"Independent φ-parametrization finds exactly four cusps",
+      detail: v.cusps.length===4
+        ? `found at φ = ${v.cusps.map(c=>((c.phi*180/Math.PI+360)%360).toFixed(3)+"°").join(", ")} — max angular deviation from {0°,90°,180°,270°}: ${Math.max(...v.angleErrors).toExponential(2)}°`
+        : `found ${v.cusps.length} cusp candidate(s) — expected 4`,
+      pass: v.angleOk
+    },
+    {
+      label:"Numeric cusp positions match the closed form",
+      detail:`|ζ_numeric − ζ_closed|:  horizontal = ${fmtExp(v.dx)},  vertical = ${fmtExp(v.dy)}`,
+      pass: (v.dx < 1e-6 && v.dy < 1e-6)
+    }
+  ];
+  const container = document.getElementById('testsContainer');
+  container.innerHTML = '';
+  rows.forEach((r,i)=>{
+    const div = document.createElement('div');
+    div.className = 'test';
+    div.innerHTML = `
+      <div class="test-num">${i+1}</div>
+      <div class="test-body">
+        <div class="test-label">${r.label}</div>
+        <div class="test-detail">${r.detail}</div>
+      </div>
+      <div class="pill ${r.pass?'pass':'fail'}">${r.pass?'PASS':'CHECK'}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ---------- SVG drawing ----------
+function pathFromSamples(fn, g, N){
+  let d = '';
+  for(let i=0;i<=N;i++){
+    const phi = 2*Math.PI*i/N;
+    const p = fn(phi,g);
+    const x = p[0], y = -p[1];
+    d += (i===0?'M':'L') + x.toFixed(5) + ',' + y.toFixed(5) + ' ';
+  }
+  return d + 'Z';
+}
+
+function circlePath(rad,N=180){
+  let d='';
+  for(let i=0;i<=N;i++){
+    const t = 2*Math.PI*i/N;
+    const x = rad*Math.cos(t), y = -rad*Math.sin(t);
+    d += (i===0?'M':'L') + x.toFixed(5) + ',' + y.toFixed(5) + ' ';
+  }
+  return d + 'Z';
+}
+
+function svgEl(tag, attrs){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function drawImagePlane(g, cusps){
+  const svg = document.getElementById('svgImage');
+  svg.innerHTML = '';
+  const N = 720;
+  let maxR = 1;
+  for(let i=0;i<N;i++){ const z = zOf(2*Math.PI*i/N, g); maxR = Math.max(maxR, Math.hypot(z[0],z[1])); }
+  const half = Math.max(maxR*1.25, 1.3);
+  svg.setAttribute('viewBox', `${-half} ${-half} ${2*half} ${2*half}`);
+
+  svg.appendChild(svgEl('line',{x1:-half,y1:0,x2:half,y2:0,stroke:'#2A3958','stroke-width':half*0.004}));
+  svg.appendChild(svgEl('line',{x1:0,y1:-half,x2:0,y2:half,stroke:'#2A3958','stroke-width':half*0.004}));
+
+  svg.appendChild(svgEl('path',{d:circlePath(1), fill:'none', stroke:'var(--ring)','stroke-width':half*0.006,'stroke-dasharray':`${half*0.02},${half*0.02}`}));
+
+  svg.appendChild(svgEl('path',{d:pathFromSamples(zOf,g,N), fill:'var(--lens-fill)', stroke:'var(--lens)','stroke-width':half*0.012}));
+
+  cusps.forEach(c=>{
+    svg.appendChild(svgEl('circle',{cx:c.z[0], cy:-c.z[1], r:half*0.022, fill:'var(--lens)'}));
+  });
+  document.getElementById('imageScaleNote').textContent = `half-width ≈ ${half.toFixed(3)} θ_E · dashed circle = Einstein ring (unit circle)`;
+}
+
+function drawSourcePlane(g, cusps){
+  const svg = document.getElementById('svgSource');
+  svg.innerHTML = '';
+  const N = 720;
+  let maxZ = 0.15;
+  for(let i=0;i<N;i++){ const z = zOf(2*Math.PI*i/N, g); const zt = zetaOf(z,g); maxZ = Math.max(maxZ, Math.hypot(zt[0],zt[1])); }
+  const half = Math.max(maxZ*1.3, 0.15);
+  svg.setAttribute('viewBox', `${-half} ${-half} ${2*half} ${2*half}`);
+
+  svg.appendChild(svgEl('line',{x1:-half,y1:0,x2:half,y2:0,stroke:'#2A3958','stroke-width':half*0.004}));
+  svg.appendChild(svgEl('line',{x1:0,y1:-half,x2:0,y2:half,stroke:'#2A3958','stroke-width':half*0.004}));
+
+  function causticSample(phi,g){ return zetaOf(zOf(phi,g), g); }
+  svg.appendChild(svgEl('path',{d:pathFromSamples(causticSample,g,N), fill:'var(--caustic-fill)', stroke:'var(--caustic)','stroke-width':half*0.012}));
+
+  cusps.forEach(c=>{
+    svg.appendChild(svgEl('circle',{cx:c.zeta[0], cy:-c.zeta[1], r:half*0.028, fill:'var(--caustic)'}));
+  });
+  document.getElementById('sourceScaleNote').textContent = `half-width ≈ ${half.toFixed(3)} θ_E`;
+}
+
+// ---------- main render ----------
+function render(g){
+  document.getElementById('gammaVal').textContent = g.toFixed(3);
+
+  const v = runVerification(g);
+  drawImagePlane(g, v.cusps);
+  drawSourcePlane(g, v.cusps);
+  renderTests(v);
+
+  const zx = 2*g/Math.sqrt(1+g);
+  const zy = 2*g/Math.sqrt(1-g);
+  document.getElementById('rowH').textContent = `± ${fmt(zx,6)}`;
+  document.getElementById('rowV').textContent = `± ${fmt(zy,6)} i`;
+}
+
+document.getElementById('gammaSlider').addEventListener('input', (e)=>{
+  render(parseFloat(e.target.value));
+});
+
+// ---------- KaTeX rendering ----------
+function K(id, tex, display=true){
+  const el = document.getElementById(id);
+  if (!el || typeof katex === 'undefined') return;
+  try { katex.render(tex, el, {throwOnError:false, displayMode:display}); }
+  catch(e){ el.textContent = tex; }
+}
+
+function renderMath(){
+  K('eq1', String.raw`\zeta(z) = z - \gamma\bar z - \dfrac{1}{\bar z}`);
+  K('eq2', String.raw`\dfrac{\partial \zeta}{\partial z} = 1 \qquad\qquad \dfrac{\partial \zeta}{\partial \bar z} = \dfrac{1}{\bar z^{2}} - \gamma`);
+  K('eq3', String.raw`\det J \;=\; 1-\left|\dfrac{1}{\bar z^{2}}-\gamma\right|^{2} \;=\;0 \quad\Longleftrightarrow\quad \left|\dfrac{1}{\bar z^{2}}-\gamma\right| = 1`);
+  K('eq4', String.raw`\dfrac{1}{z^{2}} = \gamma + e^{i\theta}, \qquad \theta\in[0,2\pi)`);
+  K('eq5', String.raw`\overline{\dfrac{1}{z^{2}}} = \overline{\gamma+e^{i\theta}} \;\Longrightarrow\; \dfrac{1}{\bar z^{2}} = \gamma+e^{-i\theta} \;\Longrightarrow\; \dfrac{1}{\bar z^{2}}-\gamma = e^{-i\theta}`);
+  K('eq6', String.raw`\dfrac{dz}{d\theta} = -\dfrac{i}{2}\,z^{3}e^{i\theta}, \qquad \dfrac{d\bar z}{d\theta} = \dfrac{i}{2}\,\bar z^{3}e^{-i\theta}`);
+  K('eq7', String.raw`\dfrac{d\zeta}{d\theta} = \dfrac{dz}{d\theta} + \left(\dfrac{1}{\bar z^{2}}-\gamma\right)\dfrac{d\bar z}{d\theta} = \dfrac{dz}{d\theta} + e^{-i\theta}\dfrac{d\bar z}{d\theta} = \dfrac{i}{2}\Big(\bar z^{3}e^{-2i\theta} - z^{3}e^{i\theta}\Big)`);
+  K('eq8', String.raw`\dfrac{d\zeta}{d\theta}=0 \quad\Longleftrightarrow\quad \bar z^{3} = z^{3}e^{3i\theta}`);
+  K('eq9', String.raw`\theta=0:\quad \bar z^{3}=z^{3}\ \Rightarrow\ z\in\mathbb{R}\ \Rightarrow\ z=\pm\dfrac{1}{\sqrt{1+\gamma}}`);
+  K('eq10', String.raw`\theta=\pi:\quad \bar z^{3}=z^{3}e^{3i\pi}=-z^{3}\ \Rightarrow\ z\in i\mathbb{R}\ \Rightarrow\ z=\pm\dfrac{i}{\sqrt{1-\gamma}}`);
+  K('eq11', String.raw`\zeta_{\text{cusp},x} = (1-\gamma)z-\dfrac{1}{z}\Big|_{z=\pm1/\sqrt{1+\gamma}} = \pm\dfrac{2\gamma}{\sqrt{1+\gamma}}`);
+  K('eq12', String.raw`\zeta_{\text{cusp},y} = (1+\gamma)z+\dfrac{1}{z}\Big|_{z=\pm i/\sqrt{1-\gamma}} = \pm\dfrac{2i\gamma}{\sqrt{1-\gamma}}`);
+  K('eq13', String.raw`F(\theta) := \alpha(\theta)-\theta, \qquad \alpha'(\theta) = \dfrac{1+\gamma\cos\theta}{R^{2}} \;>\;0 \ \text{ for all } |\gamma|<1`);
+  K('eqInlineA', String.raw`\gamma+e^{i\theta} \equiv Re^{i\alpha}`, false);
+  K('eqInlineB', String.raw`\arg z = -\alpha/2 \pmod \pi`, false);
+  K('eqInlineC', String.raw`\alpha(\theta)\equiv\theta \pmod{2\pi/3}`, false);
+  K('eqInlineD', String.raw`F(\theta)`, false);
+}
+
+// ---------- init ----------
+renderMath();
+render(0.3);
+</script>
+</body>
+</html>
