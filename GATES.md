@@ -10,6 +10,7 @@ ADMIT := G-M AND G0 AND G1 AND G2 AND G3 AND G4 AND G5 AND G6 AND G7
 - Claim: A2_Sq
 - Form: S_q = u^3/3 - alpha u or GS g = eps x^2 + delta lambda
 - Device default: CPU or TEXT
+- GPU may display the Project Desk catalog (`tools/desk_build`). GPU may not classify.
 - 00 fixtures: read-only
 - Witness of ReS fold: still 0, and not this repo's job
 

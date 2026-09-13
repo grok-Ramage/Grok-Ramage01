@@ -34,10 +34,12 @@ That pair is Sigma_Sq. Airy models the wave on Sigma_Sq. Airy does not prove a f
 - Unfolding the anti-glue family.
 - Productizing a 24D ReS solver as a hunt CERT.
 - GPU as a default device for classification.
+  GPU may display the catalog at `tools/desk_build` (WebGL). G5 still refuses GPU admit.
 
 ## Run
 
 ```bash
 python3 scripts/run_sq.py
 python3 -m unittest discover -s tests -q
+py -3 tools/desk_build/serve.py
 ```

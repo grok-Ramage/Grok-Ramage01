@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Desk — CPU classify / GPU display</title>
+  <link rel="stylesheet" href="./desk.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div>
+      <strong>Grok-Ramage Project Desk</strong>
+      <span class="kicker">catalog viewer · GPU display · CPU classify</span>
+    </div>
+    <p id="hw">probing hardware…</p>
+  </header>
+  <main>
+    <canvas id="view"></canvas>
+    <aside id="card">
+      <h2 id="title">landscape</h2>
+      <p id="role"></p>
+      <pre id="meta"></pre>
+    </aside>
+  </main>
+  <footer>
+    <span id="g5">G5: GPU admit REFUSE · device CPU</span>
+    <span id="scan">lattice …</span>
+  </footer>
+  <script type="module" src="./desk.js"></script>
+</body>
+</html>
