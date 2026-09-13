@@ -7,4 +7,4 @@ This repo: Grok-Ramage01 — implementation lab. Owns Sigma_Sq. Optical desk par
 Optical desk: parked_TEXT on Grok-Ramage01 (`notes/optical/`). Not a live family.
 
 Source of truth: `grok-Ramage/Grok-Ramage-Project-Desk` `landscape.json`.
-To add a layer or repo, edit that file and run `python scripts/sync_pointers.py`.
+To add a layer or repo, edit that file and run `py -3 scripts/sync_pointers.py`.
